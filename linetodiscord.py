@@ -5,6 +5,7 @@ from flask import Flask, request, abort
 import logging
 from linebot.models import *
 import json
+import os
 
 FORMAT = '[SYNC] %(asctime)s %(levelname)s: %(message)s'
 logger = logging.getLogger('sync')
@@ -20,6 +21,13 @@ logger.addHandler(hdr)
 
 
 app = Flask(__name__)
+
+if not os.path.isfile('set.json'):
+    set = {"access": "access_token", "secret": "secret_key"}
+    with open('set.json', 'w') as f:
+        json.dump(set, f)
+    exit()
+
 
 with open('set.json', 'r') as f:
     set = json.load(f)
@@ -45,7 +53,7 @@ def callback():
 def handle_message(event):
     msg = event.message.text
     logger.info(f'Line: {msg}')
-    webhook = DiscordWebhook("https://discord.com/api/webhooks/1019986633279414272/88Aj06nz_J0XG_NoRFnRqdVVEycYBPcEiUEQ5a66-avFt2ijfHSoT9HhwpXGLOLTw_MA",username="Line",content=msg)
+    webhook = DiscordWebhook(set['webhook'],username="Line",content=msg)
     webhook.execute()
 
 if __name__ == '__main__':
